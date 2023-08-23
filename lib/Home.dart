@@ -13,6 +13,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
+  TextEditingController _editingController = TextEditingController();
   var listaItens = [];  
 
   Future<File> _getFile() async {
@@ -22,11 +23,6 @@ class _HomeState extends State<Home> {
 
   _salvar() async {
     var file = await _getFile();
-
-    Map<String, dynamic> tarefa = Map();
-    tarefa['titulo'] = 'Ir ao Mercado';
-    tarefa['realizada'] = false;
-    listaItens.add(tarefa);
     
     var dados = jsonEncode(listaItens);
     file.writeAsString(dados);
@@ -41,6 +37,22 @@ class _HomeState extends State<Home> {
     }catch(e){
       return e;
     }
+
+  }
+
+  _salvarTarefa(){
+    String textoDigitado =  _editingController.text;
+
+    Map<String, dynamic> tarefa = Map();
+    tarefa['titulo'] = textoDigitado;
+    tarefa['realizada'] = false;
+    
+    setState(() {
+      listaItens.add(tarefa);
+    });
+    
+    _salvar();
+    _editingController.text = "";
 
   }
 
@@ -69,20 +81,62 @@ class _HomeState extends State<Home> {
               child: ListView.builder(
                 itemCount: listaItens.length,
                 itemBuilder: (context, index){
-                  return ListTile(
+
+                  return CheckboxListTile(
                     title: Text(listaItens[index]['titulo']),
+                    value: listaItens[index]['realizada'], 
+                    onChanged: (valor){
+                      setState(() {
+                        listaItens[index]['realizada'] =  valor;
+                      });
+
+                      _salvar();
+                    }
                   );
+                  // return ListTile(
+                  //   title: Text(listaItens[index]['titulo']),
+                  // );
                 }
               )
             )
           ],
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
-        onPressed: (){}
+        onPressed: (){
+          showDialog(
+            context: context, 
+            builder: (context){
+              return AlertDialog(
+                title: Text('Adicionar Tarefa'),
+                content: TextField(
+                  controller: _editingController,
+                  decoration: InputDecoration(
+                    labelText: 'Digite sua tarefa'
+                  ),
+                  onChanged: (text){
+                    _salvarTarefa();
+                  },
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context), 
+                    child: Text('Cancelar')
+                  ),
+                  TextButton(
+                    onPressed: () => {
+
+                    }  , 
+                    child: Text('Salvar')
+                  ),
+                ],
+              );
+            }
+          );
+        }
       ),
     );
   }
