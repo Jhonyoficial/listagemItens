@@ -18,7 +18,11 @@ class _HomeState extends State<Home> {
 
   Future<File> _getFile() async {
     final path = await getApplicationDocumentsDirectory();
-    return File('${path}/dados.json');
+    
+    String url = '${path.path}dados.json';
+    var myFile =  File(url);
+
+    return myFile;
   }
 
   _salvar() async {
@@ -62,9 +66,12 @@ class _HomeState extends State<Home> {
     super.initState();
     _lerArquivo()
       .then((dados){
-        setState(() {
-          listaItens = jsonDecode(dados);
-        });
+        print('caiu'+  dados);
+        if(dados != ''){
+          setState(() {
+            listaItens = jsonDecode(dados);
+          });
+        }
       });
   }
   
@@ -72,6 +79,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.purple,
         title: Text('Listagem itens'),
       ),
       body: Container(
@@ -93,9 +101,7 @@ class _HomeState extends State<Home> {
                       _salvar();
                     }
                   );
-                  // return ListTile(
-                  //   title: Text(listaItens[index]['titulo']),
-                  // );
+
                 }
               )
             )
@@ -118,7 +124,7 @@ class _HomeState extends State<Home> {
                     labelText: 'Digite sua tarefa'
                   ),
                   onChanged: (text){
-                    _salvarTarefa();
+                    // _salvarTarefa();
                   },
                 ),
                 actions: [
@@ -128,7 +134,7 @@ class _HomeState extends State<Home> {
                   ),
                   TextButton(
                     onPressed: () => {
-
+                        _salvarTarefa()
                     }  , 
                     child: Text('Salvar')
                   ),
